@@ -1,21 +1,9 @@
-# Project X #
+# Proto #
 -------------
 
 ## About ##
 
-This is an unamed project that is a multiplayer WebGL game inspired by Minecraft, Animal Crossing, and Spore. One of [Yousef Amar](http://www.yousefamar.com)'s forever projects.
-
-## Project Style Guide ##
-
-- Indentation - Tabs
-- Brackets - No spaces before or after. No space before commas.
-- Braces - Same line, e.g.:
-```
-void getX() {
-	return x;
-}
-```
-- Variables and functions in camelCase, classes in PascalCase.
+This is an unnamed project that is a multiplayer WebGL game inspired by a bunch of other games. It's development is sporadic and improvisational. It's the epitome of a forever project.
 
 ## Project Git Conventions ##
 
