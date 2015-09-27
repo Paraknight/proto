@@ -58,7 +58,7 @@ export class Game
 
     renderer = new WebGLRenderer @
 
-    fly-cam = new (require './entities/flycam.ls' .FlyCamera)!
+    fly-cam = new (require 'core/entities/flycam.ls' .FlyCamera)!
 
     renderer
       ..camera = fly-cam.camera
@@ -70,4 +70,5 @@ export class Game
 
 
     @scene.add-child fly-cam
-    @scene.add-child new (require './entities/square.ls' .Square)!
+    #@scene.add-child new (require 'core/entities/square.ls' .Square)!
+    @scene.add-child new (require 'core/entities/planet.ls' .Planet)!
