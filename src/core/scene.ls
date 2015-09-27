@@ -1,10 +1,13 @@
 require! {
-  './entity.ls': { Entity, Synchronizable }:entity
+  './entity.ls': { Entity, EntityTicker, EntityRenderer, Synchronizable, Persistent }:entity
 }
 
-export class Scene extends Entity implements Renderable, Tangible, Synchronizable, Persistent
+export class Scene extends Entity implements Synchronizable, Persistent
   ->
-    super null
+    super!
+
+    @ticker   = new EntityTicker   @
+    @renderer = new EntityRenderer @
 
     @renderables     = {}
     @tangibles       = {}
@@ -14,24 +17,24 @@ export class Scene extends Entity implements Renderable, Tangible, Synchronizabl
   add-child: ->
     it = super ...
     return unless it?
-    renderables[it.uid]     = it if it.renderables
-    tangibles[it.uid]       = it if it.tangibles
-    snychronizables[it.uid] = it if it.snychronizable
-    persistents[it.uid]     = it if it.persistents
+    @renderables[it.uid]     = it if it.renderable
+    @tangibles[it.uid]       = it if it.tangible
+    @snychronizables[it.uid] = it if it.snychronizable
+    @persistents[it.uid]     = it if it.persistent
     @emit \entityspawned it
     it
 
   remove-child: ->
     it = super ...
     return unless it?
-    delete renderables[it.uid]     if it.renderables
-    delete tangibles[it.uid]       if it.tangibles
-    delete snychronizables[it.uid] if it.snychronizable
-    delete persistents[it.uid]     if it.persistents
+    delete @renderables[it.uid]     if it.renderable
+    delete @tangibles[it.uid]       if it.tangible
+    delete @snychronizables[it.uid] if it.snychronizable
+    delete @persistents[it.uid]     if it.persistent
     @emit \entitydespawned it
     it
 
-  onsync = (event, data) !->
+  onsync: (event, data) !->
     return unless data.entity-uid?
     if data.entity-uid of @snychronizables
       @snychronizables[data.entity-uid].onsync event, data

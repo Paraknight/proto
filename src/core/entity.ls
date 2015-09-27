@@ -1,15 +1,18 @@
 require! {
   events: { EventEmitter }
   'node-uuid': uuid
+  'gl-matrix': { mat4 }
 }
 
 export class Entity extends EventEmitter
-  (@uid = uuid.v4!, @parent) ->
+  (@uid = uuid.v4!) ->
+    @transform = mat4.create!
     @children = []
 
   add-child: ->
     return unless it?
     @children.push it
+    it.parent = @
     @emit \childadded it
     it
 
@@ -17,45 +20,33 @@ export class Entity extends EventEmitter
     for child, index in @children
       if child is it
         @children.splice index, 1
+        it.parent = null
         @emit \childremoved it
         return it
 
-export Renderable = {}
-Object.define-property Renderable, \renderable value: true writable: false
+  tick: (delta) !-> for child in @children then child.tick gl
+
+
+export class EntityRenderer
+  (@entity) ->
+  init: (gl) !-> for child in @entity.children then child.renderer?.init gl
+  render: (gl, matrices) !-> for child in @entity.children then child.renderer?.render gl, matrices
+
+
+export class EntityTicker
+  (@entity) ->
+  init: !-> for child in @entity.children then child.ticker?.init!
+  tick: (delta) !-> for child in @entity.children then child.ticker?.tick delta
+
 
 export Tangible = {}
-Object.define-property Tangible, \tangible value: true writable: false
+Object.define-property Tangible, \tangible value: true writable: false enumerable: true
 
 export Synchronizable = {}
-Object.define-property Synchronizable, \synchronizable value: true writable: false
+Object.define-property Synchronizable, \synchronizable value: true writable: false enumerable: true
 Synchronizable.sync = (event, data) ->
 Synchronizable.sync-all = ->
 Synchronizable.on-sync = (event, data) ->
 
 export Persistent = {}
-Object.define-property Persistent, \persistent value: true writable: false
-
-
-
-
-
-
-export class Ground extends Entity implements Renderable, Tangible, Synchronizable, Persistent
-  (@uid, @parent) ->
-    super ...
-    @pos = x: 0 y: 0 z: 0
-
-  sync-all: !->
-
-  on-sync: (event, data) !->
-    /*
-    switch event
-    | \spawn
-    */
-
-
-
-export class Ball extends Entity implements Renderable, Tangible, Synchronizable, Persistent
-  (@uid, @parent, pos) ->
-    super ...
-    @pos = pos or x: 0 y: 0 z: 0
+Object.define-property Persistent, \persistent value: true writable: false enumerable: true

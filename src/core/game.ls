@@ -1,10 +1,12 @@
 require! {
-  './scene.ls': { Scene }
-  '../net/webrtc.ls': { PeerNetwork }
-  '../gfx/renderer.ls': { Renderer }
+  'core/scene.ls': { Scene }
+  'net/webrtc.ls': { PeerNetwork }
+  'gfx/renderer.ls': { WebGLRenderer }
 }
 
 export class Game
+  const TICK_INTERVAL_MS = 1000ms / 60 # i.e. 60 TPS
+
   (config = {}) ->
 
     # TODO: Support both reliable and unreliable DataChannels
@@ -33,15 +35,39 @@ export class Game
       for ,peer of peer-net.peers
         peer.send event, data
 
-
-    renderer = new Renderer!
-
-    window.request-animation-frame render = !->
-      window.request-animation-frame render
-      render.render!
-
-    scene = new Scene
+    @scene = new Scene
       ..sync = sync
       ..on \entityspawned !->
         it.sync = sync if it.synchronizable
+        it.ticker?.init!
+        it.renderer?.init renderer.gl
       ..on \entitydespawned !->
+
+
+    self = @
+    window.set-timeout tick = do ->
+      time = Date.now!
+      !->
+        # FIXME: Chrome throttles the interval down to 1s on inactive tabs.
+        window.set-timeout tick, TICK_INTERVAL_MS
+        now = Date.now!
+        self.scene.ticker.tick now - time
+        time := now
+    , TICK_INTERVAL_MS
+
+
+    renderer = new WebGLRenderer @
+
+    fly-cam = new (require './entities/flycam.ls' .FlyCamera)!
+
+    renderer
+      ..camera = fly-cam.camera
+      ..init!
+
+    window.request-animation-frame render = !->
+      window.request-animation-frame render
+      renderer.render!
+
+
+    @scene.add-child fly-cam
+    @scene.add-child new (require './entities/square.ls' .Square)!
