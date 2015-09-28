@@ -25,7 +25,7 @@ export class FlyCamera extends Entity
           ..[2] += delta * speed if move-backward
           self.camera.move-rel ..
 
-    @camera = new PerspectiveCamera 45, 0.1, 1000.0
+    @camera = new PerspectiveCamera 45, 0.1, 1000000.0
 
     canvas = document.get-element-by-id \wgl-canvas
 

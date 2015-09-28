@@ -11,12 +11,13 @@ export class Planet extends Entity implements Synchronizable, Persistent
     super uid, parent
     @pos = pos or x: 0 y: 0 z: 0
 
+    @ticker   = new PlanetTicker @
     @renderer = new PlanetRenderer @
 
 
 class PlanetRenderer extends EntityRenderer
   init: (gl) !->
-    icosphere = require 'core/meshes.ls' .gen-icosphere 4
+    icosphere = require 'core/meshes.ls' .gen-icosphere 4 10
 
     @vertex-buffer = gl.create-buffer!
     gl.bind-buffer gl.ARRAY_BUFFER, @vertex-buffer
@@ -37,13 +38,22 @@ class PlanetRenderer extends EntityRenderer
   render: (gl, matrices) !->
     gl.use-program @shader.program
     matrices.set-mode GLMatrices.modes.MODEL
-    matrices.translate [ 0.0, 0.0, 0.0 ]
+    matrices.translate [ 0.0, 0.0, -30.0 ]
     gl.bind-buffer gl.ARRAY_BUFFER, @vertex-buffer
     gl.bind-buffer gl.ELEMENT_ARRAY_BUFFER, @index-buffer
     gl.vertex-attrib-pointer @shader.attributes.vertex-pos, 3, gl.FLOAT, false, 0, 0
+    gl.uniform1f @shader.uniforms.time, @entity.time
     gl.uniform-matrix4fv @shader.uniforms.model-matrix, gl.FALSE, matrices.get-matrix GLMatrices.modes.MODEL
     gl.uniform-matrix4fv @shader.uniforms.view-matrix,  gl.FALSE, matrices.get-matrix GLMatrices.modes.VIEW
     gl.uniform-matrix4fv @shader.uniforms.proj-matrix,  gl.FALSE, matrices.get-matrix GLMatrices.modes.PROJECTION
     gl.draw-elements gl.TRIANGLES, @index-buffer.count, gl.UNSIGNED_SHORT, 0
 
+    super ...
+
+class PlanetTicker extends EntityTicker
+  init: ->
+    @entity.time = 1.0
+    super ...
+  tick: (delta) !->
+    @entity.time += delta * 0.0001
     super ...

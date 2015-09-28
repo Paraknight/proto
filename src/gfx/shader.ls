@@ -26,9 +26,11 @@ class Shader
 
     gl.use-program @program
 
+    lines = (vert-src + frag-src).split \\n
+
     @attributes = {}
 
-    for line in vert-src.split \\n
+    for line in lines
       continue unless line.starts-with \attribute
       var-name = line.split ' ' |> -> it[it.length - 1] |> -> it.substring 0 it.length - 1
       continue if var-name of @attributes
@@ -38,7 +40,7 @@ class Shader
 
     @uniforms = {}
 
-    for line in vert-src.split \\n
+    for line in lines
       continue unless line.starts-with \uniform
       var-name = line.split ' ' |> -> it[it.length - 1] |> -> it.substring 0 it.length - 1
       continue if var-name of @uniforms
